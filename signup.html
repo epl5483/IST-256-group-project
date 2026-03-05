@@ -2,106 +2,103 @@
 <html lang="en">
 
 <head>
-<meta charset="UTF-8">
-<title>Animal Lovers Conference | Attendee Registration</title>
+   <meta charset="UTF-8">
+   <title>Wildlife Conservation Conference | Attendee Registration</title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" 
-rel="stylesheet">
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-<link rel="stylesheet" href="css/styles.css">
+   <link rel="stylesheet" href="css/styles.css">
 
 </head>
 
 <body>
 
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-<div class="container-fluid">
+   <!-- GREEN HEADER WITH BUTTON NAVIGATION -->
+   <header class="bg-success text-white py-4">
+      
 
-<a class="navbar-brand" href="index.html">🐾 Animal Lovers Conference</a>
+      <div class="container d-flex justify-content-between align-items-center">
+         
 
-<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-<span class="navbar-toggler-icon"></span>
-</button>
+         <h2 class="fw-bold m-0"> Wildlife Conservation Conference</h2>
 
-<div class="collapse navbar-collapse" id="navbarNav">
+         <div>
 
-<ul class="navbar-nav me-auto">
+            <a href="index.html" class="btn btn-light me-2">
+               Home
+            </a>
 
-<li class="nav-item">
-<a class="nav-link" href="index.html">Home</a>
-</li>
+            <a href="signup.html" class="btn btn-dark">
+               Sign Up
+            </a>
 
-<li class="nav-item">
-<a class="nav-link active" href="signup.html">Register</a>
-</li>
+         </div>
 
-</ul>
+      </div>
 
-</div>
-</div>
-</nav>
+   </header>
 
 
 
-<div class="container text-center mt-5">
+   <div class="container text-center mt-5">
 
-<h1>Animal Lovers Conference 2026</h1>
+      <h1>Wildlife Conservation Conference 2026</h1>
 
-<p class="lead">
-Register to attend workshops, meet wildlife experts, and connect with
-fellow animal lovers.
-</p>
+      <p class="lead">
+         Register to attend workshops, meet wildlife experts, and connect with
+         fellow animal lovers.
+      </p>
 
-</div>
-
-
-
-<div class="container my-5">
-
-<div class="card shadow-lg p-4">
-
-<h2 class="text-center mb-4">Attendee Registration</h2>
-
-<form id="signupForm" class="row g-3 needs-validation" novalidate>
+   </div>
 
 
 
-<div class="col-md-6">
+   <div class="container my-5">
 
-<label for="name" class="form-label">
+      <div class="card shadow-lg p-4">
+
+         <h2 class="text-center mb-4">Attendee Registration</h2>
+
+         <form id="signupForm" class="row g-3 needs-validation" novalidate>
+
+
+
+            <div class="col-md-6">
+
+               <label for="name" class="form-label">
 Attendee Name <strong class="text-danger">*</strong>
 </label>
 
-<input type="text" class="form-control" id="name" placeholder="Jane Smith" required>
+               <input type="text" class="form-control" id="name" placeholder="Jane Smith" required>
 
-<div class="text-danger" id="nameError"></div>
+               <div class="text-danger" id="nameError"></div>
 
-</div>
+            </div>
 
 
 
-<div class="col-md-6">
+            <div class="col-md-6">
 
-<label for="email" class="form-label">
+               <label for="email" class="form-label">
 Email Address <strong class="text-danger">*</strong>
 </label>
 
-<input type="email" class="form-control" id="email" placeholder="jane@email.com" required>
+               <input type="email" class="form-control" id="email" placeholder="jane@email.com" required>
 
-<div class="text-danger" id="emailError"></div>
+               <div class="text-danger" id="emailError"></div>
 
-</div>
+            </div>
 
 
 
-<div class="col-md-6">
+            <div class="col-md-6">
 
-<label for="grade" class="form-label">
+               <label for="grade" class="form-label">
 Grade Level <strong class="text-danger">*</strong>
 </label>
 
-<select class="form-select" id="grade" required>
+               <select class="form-select" id="grade" required>
 
 <option value="">Choose...</option>
 <option>Freshman</option>
@@ -112,84 +109,84 @@ Grade Level <strong class="text-danger">*</strong>
 
 </select>
 
-<div class="text-danger" id="gradeError"></div>
+               <div class="text-danger" id="gradeError"></div>
 
-</div>
+            </div>
 
 
 
-<div class="col-md-6">
+            <div class="col-md-6">
 
-<label for="institution" class="form-label">
+               <label for="institution" class="form-label">
 Institution <strong class="text-danger">*</strong>
 </label>
 
-<input type="text" class="form-control" id="institution" placeholder="Penn State University" required>
+               <input type="text" class="form-control" id="institution" placeholder="Penn State University" required>
 
-<div class="text-danger" id="institutionError"></div>
+               <div class="text-danger" id="institutionError"></div>
 
-</div>
+            </div>
 
 
 
-<div class="col-md-6">
+            <div class="col-md-6">
 
-<label for="phone" class="form-label">
+               <label for="phone" class="form-label">
 Contact Number
 </label>
 
-<input type="tel" class="form-control" id="phone" placeholder="123-456-7890">
+               <input type="tel" class="form-control" id="phone" placeholder="123-456-7890">
 
-<div class="text-danger" id="phoneError"></div>
+               <div class="text-danger" id="phoneError"></div>
 
-</div>
+            </div>
 
 
 
-<div class="col-12 text-center mt-3">
+            <div class="col-12 text-center mt-3">
 
-<button class="btn btn-success btn-lg" type="submit">
+               <button class="btn btn-success btn-lg" type="submit">
 Register for Conference
 </button>
 
-<button class="btn btn-secondary btn-lg" type="reset">
+               <button class="btn btn-secondary btn-lg" type="reset">
 Clear Form
 </button>
 
-</div>
+            </div>
 
-</form>
+         </form>
 
-</div>
+      </div>
 
-</div>
-
-
-
-<div class="container text-center my-5">
-
-<h3 class="mb-3">Registered Attendees</h3>
-
-<p class="text-muted">
-Submitted attendee information will appear below.
-</p>
-
-<div class="container my-4" id="userCard">
-
-</div>
-
-</div>
+   </div>
 
 
 
-<footer class="bg-dark text-white text-center py-3 mt-5">
+   <div class="container text-center my-5">
 
-<p>© 2026 Animal Lovers Conference | IST 256 Group Project</p>
+      <h3 class="mb-3">Registered Attendees</h3>
 
-</footer>
+      <p class="text-muted">
+         Submitted attendee information will appear below.
+      </p>
+
+      <div class="container my-4" id="userCard">
+
+      </div>
+
+   </div>
 
 
-<script src="js/attendee.js"></script>
+
+   <footer class="bg-dark text-white text-center py-3 mt-5">
+
+      <p>© 2026 Wildlife Conservation Conference | IST 256 Group Project</p>
+
+   </footer>
+
+
+   <script src="js/attendee.js"></script>
 
 </body>
 
