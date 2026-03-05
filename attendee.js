@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'conference_attendee';
+const STORAGE_KEY = 'conference_attendees';
 
 function updateBox(form, errorElement, isValid, errorMessage) {
     if (isValid) {
@@ -22,13 +22,11 @@ function validateField(form) {
     let isValid = true;
     let errorMessage = "";
 
-    // Required check
     if (form.hasAttribute('required') && value === '') {
         isValid = false;
         errorMessage = 'This is a required field';
     }
 
-    // Field-specific validation
     if (isValid && value !== '') {
         switch (fieldId) {
             case 'fullName':
@@ -47,7 +45,7 @@ function validateField(form) {
                 break;
 
             case 'contactNumber':
-                if (value.length > 0 && value.length != 7) {
+                if (value.length > 0 && value.length !== 7) {
                     isValid = false;
                     errorMessage = 'Invalid number, number must be 7 digits';
                 }
@@ -85,15 +83,15 @@ function getFormData(formElement) {
         email: data.email,
         gradeLevel: data.gradeLevel,
         institution: data.institution,
-        contactNumber: data.contactNumber || null,
+        contactNumber: data.contactNumber || null
     };
 }
 
 function saveFormDataLocally(formData) {
     try {
-        const attendeeJSON = JSON.stringify(formData);
-        local.setItem(STORAGE_KEY, attendeeJSON);
-        console.log('Saved successfully!');
+        const existing = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        existing.push(formData);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
         return true;
     } catch (error) {
         console.log('Error saving to local storage:', error);
@@ -101,23 +99,32 @@ function saveFormDataLocally(formData) {
     }
 }
 
-function displayAttendeeCard(attendeeData) {
+function displayAllAttendees() {
     const container = document.getElementById('userCard');
+    const attendees = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 
-    let cardHtml = `
-        <div class="card">
-            <div>
-                <h5>${attendeeData.fullName}</h5>
-                <p>Email: ${attendeeData.email}</p>
-                <p>Grade Level: ${attendeeData.gradeLevel}</p>
-                <p>Institution: ${attendeeData.institution}</p>
-                <p>Contact Number: ${attendeeData.contactNumber || "Not provided"}</p>
-                <button class="btn btn-danger">Delete Attendee</button>
+    container.innerHTML = "";
+
+    attendees.forEach((attendee, index) => {
+        const cardHtml = `
+            <div class="card mb-3 p-3">
+                <h5>${attendee.fullName}</h5>
+                <p>Email: ${attendee.email}</p>
+                <p>Grade Level: ${attendee.gradeLevel}</p>
+                <p>Institution: ${attendee.institution}</p>
+                <p>Contact Number: ${attendee.contactNumber || "Not provided"}</p>
+                <button class="btn btn-danger" onclick="deleteAttendee(${index})">Delete</button>
             </div>
-        </div>
-    `;
+        `;
+        container.innerHTML += cardHtml;
+    });
+}
 
-    container.innerHTML = cardHtml;
+function deleteAttendee(index) {
+    const attendees = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    attendees.splice(index, 1);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(attendees));
+    displayAllAttendees();
 }
 
 function handleSignupSubmit(event) {
@@ -137,11 +144,13 @@ function handleSignupSubmit(event) {
         window.alert('Registration failed.');
     }
 
-    displayAttendeeCard(formData);
+    displayAllAttendees();
+    formElement.reset();
 }
 
 function initializeApp() {
     document.getElementById('signupForm').addEventListener('submit', handleSignupSubmit);
+    displayAllAttendees();
 }
 
 document.addEventListener('DOMContentLoaded', initializeApp);
