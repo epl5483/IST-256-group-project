@@ -5,12 +5,10 @@ function updateBox(form, errorElement, isValid, errorMessage) {
         form.classList.add('is-valid');
         form.classList.remove('is-invalid');
         errorElement.textContent = "";
-        errorElement.classList.remove('show');
     } else {
         form.classList.add('is-invalid');
         form.classList.remove('is-valid');
         errorElement.textContent = errorMessage;
-        errorElement.classList.add('show');
     }
 }
 
@@ -37,17 +35,17 @@ function validateField(form) {
                 break;
 
             case 'email':
-                const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailPattern.test(value)) {
                     isValid = false;
-                    errorMessage = 'Invalid email, please enter a valid email';
+                    errorMessage = 'Invalid email format';
                 }
                 break;
 
             case 'contactNumber':
-                if (value.length > 0 && value.length !== 10) {
+                if (value.length > 0 && value.length !== 7) {
                     isValid = false;
-                    errorMessage = 'Invalid number, number must be 7 digits';
+                    errorMessage = 'Number must be 7 digits';
                 }
                 break;
         }
@@ -72,31 +70,19 @@ function validateForm(formElement) {
 
 function getFormData(formElement) {
     const formData = new FormData(formElement);
-    const data = {};
-
-    for (let [key, value] of formData.entries()) {
-        data[key] = value;
-    }
-
     return {
-        fullName: data.fullName,
-        email: data.email,
-        gradeLevel: data.gradeLevel,
-        institution: data.institution,
-        contactNumber: data.contactNumber || null
+        fullName: formData.get('fullName'),
+        email: formData.get('email'),
+        gradeLevel: formData.get('gradeLevel'),
+        institution: formData.get('institution'),
+        contactNumber: formData.get('contactNumber') || "Not provided"
     };
 }
 
 function saveFormDataLocally(formData) {
-    try {
-        const existing = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-        existing.push(formData);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
-        return true;
-    } catch (error) {
-        console.log('Error saving to local storage:', error);
-        return false;
-    }
+    const existing = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    existing.push(formData);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
 }
 
 function displayAllAttendees() {
@@ -106,17 +92,16 @@ function displayAllAttendees() {
     container.innerHTML = "";
 
     attendees.forEach((attendee, index) => {
-        const cardHtml = `
+        container.innerHTML += `
             <div class="card mb-3 p-3">
                 <h5>${attendee.fullName}</h5>
                 <p>Email: ${attendee.email}</p>
                 <p>Grade Level: ${attendee.gradeLevel}</p>
                 <p>Institution: ${attendee.institution}</p>
-                <p>Contact Number: ${attendee.contactNumber || "Not provided"}</p>
+                <p>Contact Number: ${attendee.contactNumber}</p>
                 <button class="btn btn-danger" onclick="deleteAttendee(${index})">Delete</button>
             </div>
         `;
-        container.innerHTML += cardHtml;
     });
 }
 
@@ -133,24 +118,20 @@ function handleSignupSubmit(event) {
     const formElement = document.getElementById("signupForm");
 
     if (!validateForm(formElement)) {
+        alert("Please correct the errors before submitting.");
         return;
     }
 
     const formData = getFormData(formElement);
+    saveFormDataLocally(formData);
 
-    if (saveFormDataLocally(formData)) {
-        window.alert('Attendee successfully registered!');
-    } else {
-        window.alert('Registration failed.');
-    }
+    alert("Attendee successfully registered!");
 
     displayAllAttendees();
     formElement.reset();
 }
 
-function initializeApp() {
+document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('signupForm').addEventListener('submit', handleSignupSubmit);
     displayAllAttendees();
-}
-
-document.addEventListener('DOMContentLoaded', initializeApp);
+});
