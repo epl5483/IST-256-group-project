@@ -45,7 +45,7 @@ function validateField(form) {
                 break;
 
             case 'contactNumber':
-                if (value.length > 0 && value.length !== 7) {
+                if (value.length > 0 && value.length !== 10) {
                     isValid = false;
                     errorMessage = 'Invalid number, number must be 7 digits';
                 }
