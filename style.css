@@ -1,7 +1,20 @@
+html, body {
+    height: 100%;
+}
+
 body {
-    background-image: url('A04B66CF-D9DD-4103-A3C0-45CBEFCF2B4C_4_5005_c.jpeg');
-    background-size: cover;  
+    display: flex;
+    flex-direction: column;
+    background-image: url('YOUR_IMAGE_FILENAME.jpg');
+    background-size: cover;
     background-position: center;
-    background-repeat: no-repeat; 
-    color: white; 
+    background-repeat: no-repeat;
+    text-shadow: 1px 1px 4px black;
+    padding: 100px 0;
+}
+
+
+
+footer {
+    margin-top: auto;
 }
