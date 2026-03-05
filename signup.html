@@ -11,7 +11,7 @@
 
 <body>
 
-   <header class="bg-success text-white py-4">
+   <header class="text-white py-4">
       <div class="container d-flex justify-content-between align-items-center">
          <h2 class="fw-bold m-0">Wildlife Conservation Conference</h2>
 
@@ -24,9 +24,7 @@
 
    <div class="container text-center mt-5">
       <h1>Wildlife Conservation Conference 2026</h1>
-      <p class="lead">
-         Register to attend workshops, meet wildlife experts, and connect with fellow animal lovers.
-      </p>
+      <p class="lead">Register to attend workshops, meet wildlife experts, and connect with fellow animal lovers.</p>
    </div>
 
    <div class="container my-5">
@@ -35,29 +33,21 @@
 
          <form id="signupForm" class="row g-3 needs-validation" novalidate>
 
-
             <div class="col-md-6">
-               <label for="fullName" class="form-label">
-                  Attendee Name <strong class="text-danger">*</strong>
-               </label>
-               <input type="text" class="form-control" id="fullName" placeholder="Jane Smith" required>
+               <label for="fullName" class="form-label">Attendee Name *</label>
+               <input type="text" class="form-control" id="fullName" name="fullName" required>
                <div class="text-danger" id="fullNameError"></div>
             </div>
 
             <div class="col-md-6">
-               <label for="email" class="form-label">
-                  Email Address <strong class="text-danger">*</strong>
-               </label>
-               <input type="email" class="form-control" id="email" placeholder="jane@email.com" required>
+               <label for="email" class="form-label">Email Address *</label>
+               <input type="email" class="form-control" id="email" name="email" required>
                <div class="text-danger" id="emailError"></div>
             </div>
 
-
             <div class="col-md-6">
-               <label for="gradeLevel" class="form-label">
-                  Grade Level <strong class="text-danger">*</strong>
-               </label>
-               <select class="form-select" id="gradeLevel" required>
+               <label for="gradeLevel" class="form-label">Grade Level *</label>
+               <select class="form-select" id="gradeLevel" name="gradeLevel" required>
                   <option value="">Choose...</option>
                   <option>Freshman</option>
                   <option>Sophomore</option>
@@ -68,19 +58,15 @@
                <div class="text-danger" id="gradeLevelError"></div>
             </div>
 
-
             <div class="col-md-6">
-               <label for="institution" class="form-label">
-                  Institution <strong class="text-danger">*</strong>
-               </label>
-               <input type="text" class="form-control" id="institution" placeholder="Penn State University" required>
+               <label for="institution" class="form-label">Institution *</label>
+               <input type="text" class="form-control" id="institution" name="institution" required>
                <div class="text-danger" id="institutionError"></div>
             </div>
 
-
             <div class="col-md-6">
                <label for="contactNumber" class="form-label">Contact Number</label>
-               <input type="tel" class="form-control" id="contactNumber" placeholder="123-456-7890">
+               <input type="tel" class="form-control" id="contactNumber" name="contactNumber">
                <div class="text-danger" id="contactNumberError"></div>
             </div>
 
@@ -100,8 +86,8 @@
       <div class="container my-4" id="userCard"></div>
    </div>
 
-   <footer class="bg-dark text-white text-center py-3 mt-5">
-      <p>© 2026 Wildlife Conservation Conference | IST 256 Group Project</p>
+   <footer class="bg-dark text-white text-center py-3 mt-auto">
+      <p>&copy; 2026 Wildlife Conservation Conference | IST 256 Group Project</p>
    </footer>
 
    <script src="attendee.js"></script>
