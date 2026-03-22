@@ -27,13 +27,7 @@
    <h1>Session Management</h1>
 </div>
 
-<div class="container my-4">
-   <div class="input-group">
-      <input type="text" id="searchInput" class="form-control" placeholder="Search events...">
-      <button class="btn btn-success" onclick="searchEvents()">Search</button>
-   </div>
-</div>
-
+<!-- FORM -->
 <div class="container my-5">
    <div class="card shadow-lg p-4">
       <h2 class="text-center mb-4">Event Session Form</h2>
@@ -41,40 +35,44 @@
       <form id="signupForm" class="row g-3">
 
          <div class="col-md-6">
-            <label class="form-label">Event Title *</label>
-            <input type="text" class="form-control" id="eventTitle" required>
-         </div>
-
-         <div class="col-md-6">
             <label class="form-label">Session ID *</label>
             <input type="text" class="form-control" id="sessionID" required>
+            <small class="text-danger" id="sessionIDError"></small>
          </div>
 
          <div class="col-md-6">
-            <label class="form-label">Category *</label>
-            <select class="form-select" id="category" required>
-               <option value="">Choose...</option>
-               <option>Workshop</option>
-               <option>Seminar</option>
-               <option>Social event</option>
-               <option>Educational</option>
-            </select>
+            <label class="form-label">Session Title *</label>
+            <input type="text" class="form-control" id="sessionTitle" required>
+            <small class="text-danger" id="sessionTitleError"></small>
+         </div>
+
+         <div class="col-md-6">
+            <label class="form-label">Workshop *</label>
+            <input type="text" class="form-control" id="workshop" required>
+            <small class="text-danger" id="workshopError"></small>
          </div>
 
          <div class="col-md-6">
             <label class="form-label">Duration *</label>
             <input type="text" class="form-control" id="duration" required>
+            <small class="text-danger" id="durationError"></small>
          </div>
 
          <div class="col-md-6">
-            <label class="form-label">Price *</label>
-            <input type="text" class="form-control" id="price" required>
+            <label class="form-label">Registration Fee *</label>
+            <input type="text" class="form-control" id="registrationFee" required>
+            <small class="text-danger" id="registrationFeeError"></small>
+         </div>
+
+         <div class="col-md-6">
+            <label class="form-label">Speaker *</label>
+            <input type="text" class="form-control" id="speaker" required>
+            <small class="text-danger" id="speakerError"></small>
          </div>
 
          <div class="col-12">
             <label class="form-label">Additional Info</label>
-            <textarea class="form-control" id="additionalInfo" rows="3"
-               placeholder="Enter any extra details..."></textarea>
+            <textarea class="form-control" id="additionalInfo" rows="3"></textarea>
          </div>
 
          <div class="col-12 text-center mt-3">
@@ -86,9 +84,10 @@
    </div>
 </div>
 
+<!-- DISPLAY -->
 <div class="container text-center my-5">
    <h3 class="mb-3">Available Sessions</h3>
-   <div class="row" id="sessionCards"></div>
+   <div id="sessionCard"></div>
 </div>
 
 <footer class="bg-dark text-white text-center py-3">
