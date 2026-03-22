@@ -131,6 +131,19 @@ function displayAllSessions(list = null) {
     });
 }
 
+function searchSessions() {
+    const query = document.getElementById('searchInput').value.toLowerCase();
+    const sessions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+
+    const filtered = sessions.filter(session =>
+        session.sessionID.toLowerCase().includes(query) ||
+        session.sessionTitle.toLowerCase().includes(query) ||
+        session.workshop.toLowerCase().includes(query) ||
+        session.speaker.toLowerCase().includes(query)
+    );
+
+    displayAllSessions(filtered);
+}
 
 function deleteSession(index) {
     const sessions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
