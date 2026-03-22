@@ -1,4 +1,5 @@
 const STORAGE_KEY = 'conference_session';
+let editIndex = null;
 
 function updateBox(form, errorElement, isValid, errorMessage) {
     if (isValid) {
@@ -107,9 +108,9 @@ function saveFormDataLocally(formData) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
 }
 
-function displayAllSessions() {
+function displayAllSessions(list = null) {
     const container = document.getElementById('sessionCard');
-    const sessions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    const sessions = list || JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 
     container.innerHTML = "";
 
@@ -123,11 +124,13 @@ function displayAllSessions() {
                 <p>Registration Fee: ${session.registrationFee}</p>
                 <p>Speaker: ${session.speaker}</p>
                 <p>Additional Info: ${session.additionalInfo}</p>
+                <button class="btn btn-warning me-2" onclick="editSession(${index})">Edit</button>
                 <button class="btn btn-danger" onclick="deleteSession(${index})">Delete</button>
             </div>
         `;
     });
 }
+
 
 function deleteSession(index) {
     const sessions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
@@ -136,24 +139,43 @@ function deleteSession(index) {
     displayAllSessions();
 }
 
+function editSession(index) {
+    const sessions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    const s = sessions[index];
+
+    document.getElementById('sessionID').value = s.sessionID;
+    document.getElementById('sessionTitle').value = s.sessionTitle;
+    document.getElementById('workshop').value = s.workshop;
+    document.getElementById('duration').value = s.duration;
+    document.getElementById('registrationFee').value = s.registrationFee;
+    document.getElementById('speaker').value = s.speaker;
+    document.getElementById('additionalInfo').value = s.additionalInfo;
+    editIndex = index;
+}
+
+
 function handleSignupSubmit(event) {
     event.preventDefault();
-
     const formElement = document.getElementById("signupForm");
-
     if (!validateForm(formElement)) {
         alert("Please correct the errors before submitting.");
         return;
     }
-
     const formData = getFormData(formElement);
-    saveFormDataLocally(formData);
-
-    alert("Session successfully registered!");
-
+    let sessions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    if (editIndex !== null) {
+        sessions[editIndex] = formData;
+        editIndex = null;
+        alert("Session updated successfully!");
+    } else {
+        sessions.push(formData);
+        alert("Session successfully registered!");
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
     displayAllSessions();
     formElement.reset();
 }
+
 
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('signupForm').addEventListener('submit', handleSignupSubmit);
