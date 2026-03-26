@@ -4,14 +4,22 @@ const STORAGE_KEY = 'conference_session';
 $(document).ready(function() {
     displayProductsFromStorage();
 
-    function displayProductsFromStorage() {
+    function displayProductsFromStorage(filterQuery = "") {
         const $productList = $('#productList');
-        const sessions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        let sessions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+
+        if (filterQuery) {
+            sessions = sessions.filter(s => 
+                s.sessionTitle.toLowerCase().includes(filterQuery.toLowerCase()) ||
+                s.speaker.toLowerCase().includes(filterQuery.toLowerCase()) ||
+                s.sessionID.toLowerCase().includes(filterQuery.toLowerCase())
+            );
+        }
 
         $productList.empty();
 
         if (sessions.length === 0) {
-            $productList.html('<p class="text-muted">No sessions available. Please add them in the Sessions page.</p>');
+            $productList.html('<p class="text-muted">No matching sessions found.</p>');
             return;
         }
 
@@ -41,6 +49,10 @@ $(document).ready(function() {
             $productList.append(productHtml);
         });
     }
+
+    $('#searchInput').on('keyup', function() {
+        displayProductsFromStorage($(this).val());
+    });
 
     function updateCartUI() {
         var $cartContainer = $('#cartItems');
