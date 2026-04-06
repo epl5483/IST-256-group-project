@@ -1,6 +1,8 @@
 const STORAGE_KEY = 'conference_attendees';
 
 function updateBox(form, errorElement, isValid, errorMessage) {
+    if (!errorElement) return; // Prevent crashes if span missing
+
     if (isValid) {
         form.classList.add('is-valid');
         form.classList.remove('is-invalid');
@@ -43,7 +45,7 @@ function validateField(form) {
                 break;
 
             case 'contactNumber':
-                if (value.length > 0 && value.length !== 10) {
+                if (!/^\d{10}$/.test(value)) {
                     isValid = false;
                     errorMessage = 'Number must be 10 digits';
                 }
@@ -59,8 +61,8 @@ function validateForm(formElement) {
     let isValid = true;
     const inputs = formElement.querySelectorAll('input, select');
 
-    inputs.forEach(form => {
-        if (!validateField(form)) {
+    inputs.forEach(input => {
+        if (!validateField(input)) {
             isValid = false;
         }
     });
@@ -87,14 +89,58 @@ function saveFormDataLocally(formData) {
 
 function displayAllAttendees() {
     const container = document.getElementById('userCard');
-    const attendees = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    if (!container) return;
 
+    const attendees = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
     container.innerHTML = "";
 
     attendees.forEach((attendee, index) => {
         container.innerHTML += `
             <div class="card mb-3 p-3">
                 <h5>${attendee.fullName}</h5>
+                <p>Email: ${attendee.email}</p>
+                <p>Grade Level: ${attendee.gradeLevel}</p>
+                <p>Institution: ${attendee.institution}</p>
+                <p>Contact Number: ${attendee.contactNumber}</p>
+                <button class="btn btn-danger" onclick="deleteAttendee(${index})">Delete</button>
+            </div>
+        `;
+    });
+}
+
+function deleteAttendee(index) {
+    const attendees = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    attendees.splice(index, 1);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(attendees));
+    displayAllAttendees();
+}
+
+function handleSignupSubmit(event) {
+    event.preventDefault();
+
+    const formElement = document.getElementById("signupForm");
+
+    if (!validateForm(formElement)) {
+        alert("Please correct the errors before submitting.");
+        return;
+    }
+
+    const formData = getFormData(formElement);
+    saveFormDataLocally(formData);
+
+    alert("Attendee successfully registered!");
+
+    displayAllAttendees();
+    formElement.reset();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('signupForm');
+    if (form) form.addEventListener('submit', handleSignupSubmit);
+
+    displayAllAttendees();
+});
+
                 <p>Email: ${attendee.email}</p>
                 <p>Grade Level: ${attendee.gradeLevel}</p>
                 <p>Institution: ${attendee.institution}</p>
