@@ -1,67 +1,41 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shopping Cart | Wildlife Conservation</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .cart-header { background-color: #4A90E2 !important; }
-        .btn-add { background-color: #4A90E2; border: none; }
-        .btn-checkout { background-color: #438157; border: none; } 
-        .price-text { color: #438157; font-weight: bold; }
-    </style>
-</head>
-<body class="bg-light">
+import React from "react";
+import SessionCart from "./SessionCart"; // your React cart component
+import "./CartPage.css"; // optional if you want to move styles out
 
-<header class="bg-success text-white py-4 mb-4">
-    <div class="container d-flex justify-content-between align-items-center">
-        <h2 class="fw-bold m-0"> Shopping Cart</h2>
-        <nav>
-            <a href="index.html" class="btn btn-outline-light me-2">Home</a>
-            <a href="session.html" class="btn btn-outline-light me-2">Sessions</a>
-            <a href="cart.html" class="btn btn-light">Cart</a>
-        </nav>
-    </div>
-</header>
+function CartPage() {
+  return (
+    <div className="bg-light min-vh-100">
+      {/* HEADER */}
+      <header className="bg-success text-white py-4 mb-4">
+        <div className="container d-flex justify-content-between align-items-center">
+          <h2 className="fw-bold m-0">Shopping Cart</h2>
 
-<main class="container">
-    <p class="text-center text-muted mb-5">Browse products, add to cart, and checkout using jQuery & AJAX</p>
-
-    <div class="row">
-        <div class="col-md-8">
-            <h3 class="mb-4">Available Sessions</h3>
-            
-            <div class="card mb-4 p-3 shadow-sm">
-                <label class="form-label fw-bold">Search Sessions:</label>
-                <input type="text" id="searchInput" class="form-control" placeholder="Search by title, speaker, or ID...">
-            </div>
-
-            <div id="productList"></div>
+          <nav>
+            <a href="/" className="btn btn-outline-light me-2">
+              Home
+            </a>
+            <a href="/sessions" className="btn btn-outline-light me-2">
+              Sessions
+            </a>
+            <a href="/cart" className="btn btn-light">
+              Cart
+            </a>
+          </nav>
         </div>
+      </header>
 
-        <div class="col-md-4">
-            <div class="card shadow border-0">
-                <div class="card-header cart-header text-white py-3">
-                    <h5 class="m-0">Your Cart</h5>
-                </div>
-                <div class="card-body">
-                    <div id="cartItems">
-                        <p class="text-muted text-center">Your cart is empty</p>
-                    </div>
-                    <hr>
-                    <div class="d-flex justify-content-between align-items-center fw-bold fs-5">
-                        <span>Total:</span>
-                        <span id="cartTotal">$0.00</span>
-                    </div>
-                    <button id="checkoutBtn" class="btn btn-success w-100 mt-3">Complete Registration</button>
-                </div>
-            </div>
-        </div>
+      {/* MAIN CONTENT */}
+      <main className="container">
+        <p className="text-center text-muted mb-5">
+          Browse products, add to cart, and checkout using React + Fetch API
+        </p>
+
+        {/* The entire cart + session list UI is handled by SessionCart */}
+        <SessionCart />
+      </main>
     </div>
-</main>
+  );
+}
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<script src="cart.js"></script>
-</body>
-</html>
+export default CartPage;
+
