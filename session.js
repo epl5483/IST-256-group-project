@@ -1,196 +1,233 @@
-const STORAGE_KEY = 'conference_session';
-let editIndex = null;
+import React, { useEffect, useState } from "react";
 
-function updateBox(form, errorElement, isValid, errorMessage) {
-    if (isValid) {
-        form.classList.add('is-valid');
-        form.classList.remove('is-invalid');
-        errorElement.textContent = "";
-    } else {
-        form.classList.add('is-invalid');
-        form.classList.remove('is-valid');
-        errorElement.textContent = errorMessage;
-    }
-}
+const STORAGE_KEY = "conference_session";
 
-function validateField(form) {
-    const fieldId = form.id;
-    const value = form.value.trim();
-    const errorElement = document.getElementById(fieldId + 'Error');
+function SessionManager() {
+  const [sessions, setSessions] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [editIndex, setEditIndex] = useState(null);
 
-    let isValid = true;
-    let errorMessage = "";
+  const [form, setForm] = useState({
+    sessionID: "",
+    sessionTitle: "",
+    workshop: "",
+    duration: "",
+    registrationFee: "",
+    speaker: "",
+    additionalInfo: "",
+  });
 
-    if (form.hasAttribute('required') && value === '') {
-        isValid = false;
-        errorMessage = 'This is a required field';
-    }
+  const [errors, setErrors] = useState({});
 
-    if (isValid && value !== '') {
-        switch (fieldId) {
-            case 'sessionID':
-                if (value.length < 4) {
-                    isValid = false;
-                    errorMessage = 'Session ID must be at least 4 characters';
-                }
-                break;
+  
+  useEffect(() => {
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    setSessions(stored);
+  }, []);
 
-            case 'sessionTitle':
-                if (value.length < 4) {
-                    isValid = false;
-                    errorMessage = 'Title must be at least 4 characters';
-                }
-                break;
+  
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+  }, [sessions]);
 
-            case 'workshop':
-                if (value.length < 4) {
-                    isValid = false;
-                    errorMessage = 'Workshop must be at least 4 characters';
-                }
-                break;
-            
-            case 'duration':
-                if (value.length < 1) {
-                    isValid = false;
-                    errorMessage = 'duration must be at least 1 character';
-                }
-                break;
 
-            case 'registrationFee':
-                if (value.length < 2) {
-                    isValid = false;
-                    errorMessage = 'Registration Fee must be at least 2 characters';
-                }
-                break;
+  const validateField = (name, value) => {
+    let error = "";
 
-            case 'speaker':
-                if (value.length < 4) {
-                    isValid = false;
-                    errorMessage = 'Speaker must be at least 4 characters';
-                }
-                break;
-        }
+    if (!value && ["sessionID", "sessionTitle", "workshop", "duration", "registrationFee", "speaker"].includes(name)) {
+      return "This is a required field";
     }
 
-    updateBox(form, errorElement, isValid, errorMessage);
-    return isValid;
-}
+    if (value) {
+      if (["sessionID", "sessionTitle", "workshop", "speaker"].includes(name) && value.length < 4) {
+        return `${name} must be at least 4 characters`;
+      }
+      if (name === "duration" && value.length < 1) {
+        return "Duration must be at least 1 character";
+      }
+      if (name === "registrationFee" && value.length < 2) {
+        return "Registration Fee must be at least 2 characters";
+      }
+    }
 
-function validateForm(formElement) {
-    let isValid = true;
-    const inputs = formElement.querySelectorAll('input, select');
+    return error;
+  };
 
-    inputs.forEach(form => {
-        if (!validateField(form)) {
-            isValid = false;
-        }
+  const validateForm = () => {
+    const newErrors = {};
+    Object.keys(form).forEach((key) => {
+      newErrors[key] = validateField(key, form[key]);
     });
+    setErrors(newErrors);
+    return !Object.values(newErrors).some((e) => e);
+  };
 
-    return isValid;
-}
 
-function getFormData(formElement) {
-    const formData = new FormData(formElement);
-    return {
-        sessionID: formData.get('sessionID'),
-        sessionTitle: formData.get('sessionTitle'),
-        workshop: formData.get('workshop'),
-        duration: formData.get('duration'),
-        registrationFee: formData.get('registrationFee'),
-        speaker: formData.get('speaker'),
-        additionalInfo: formData.get('additionalInfo') || "Not provided"
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setForm((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      alert("Please correct the errors before submitting.");
+      return;
+    }
+
+    const newSession = {
+      ...form,
+      additionalInfo: form.additionalInfo || "Not provided",
     };
-}
 
-function saveFormDataLocally(formData) {
-    const existing = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-    existing.push(formData);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
-}
-
-function displayAllSessions(list = null) {
-    const container = document.getElementById('sessionCard');
-    const sessions = list || JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-
-    container.innerHTML = "";
-
-    sessions.forEach((session, index) => {
-        container.innerHTML += `
-            <div class="card mb-3 p-3">
-                <h5>${session.sessionID}</h5>
-                <p>SessionTitle: ${session.sessionTitle}</p>
-                <p>Workshop: ${session.workshop}</p>
-                <p>Duration: ${session.duration}</p>
-                <p>Registration Fee: ${session.registrationFee}</p>
-                <p>Speaker: ${session.speaker}</p>
-                <p>Additional Info: ${session.additionalInfo}</p>
-                <button class="btn btn-warning me-2" onclick="editSession(${index})">Edit</button>
-                <button class="btn btn-danger" onclick="deleteSession(${index})">Delete</button>
-            </div>
-        `;
-    });
-}
-
-function searchSessions() {
-    const query = document.getElementById('searchInput').value.toLowerCase();
-    const sessions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-
-    const filtered = sessions.filter(session =>
-        session.sessionID.toLowerCase().includes(query) ||
-        session.sessionTitle.toLowerCase().includes(query) ||
-        session.workshop.toLowerCase().includes(query) ||
-        session.speaker.toLowerCase().includes(query)
-    );
-
-    displayAllSessions(filtered);
-}
-
-function deleteSession(index) {
-    const sessions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-    sessions.splice(index, 1);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
-    displayAllSessions();
-}
-
-function editSession(index) {
-    const sessions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-    const s = sessions[index];
-
-    document.getElementById('sessionID').value = s.sessionID;
-    document.getElementById('sessionTitle').value = s.sessionTitle;
-    document.getElementById('workshop').value = s.workshop;
-    document.getElementById('duration').value = s.duration;
-    document.getElementById('registrationFee').value = s.registrationFee;
-    document.getElementById('speaker').value = s.speaker;
-    document.getElementById('additionalInfo').value = s.additionalInfo;
-    editIndex = index;
-}
-
-
-function handleSignupSubmit(event) {
-    event.preventDefault();
-    const formElement = document.getElementById("signupForm");
-    if (!validateForm(formElement)) {
-        alert("Please correct the errors before submitting.");
-        return;
-    }
-    const formData = getFormData(formElement);
-    let sessions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
     if (editIndex !== null) {
-        sessions[editIndex] = formData;
-        editIndex = null;
-        alert("Session updated successfully!");
+      const updated = [...sessions];
+      updated[editIndex] = newSession;
+      setSessions(updated);
+      setEditIndex(null);
+      alert("Session updated successfully!");
     } else {
-        sessions.push(formData);
-        alert("Session successfully registered!");
+      setSessions((prev) => [...prev, newSession]);
+      alert("Session successfully registered!");
     }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
-    displayAllSessions();
-    formElement.reset();
+
+    setForm({
+      sessionID: "",
+      sessionTitle: "",
+      workshop: "",
+      duration: "",
+      registrationFee: "",
+      speaker: "",
+      additionalInfo: "",
+    });
+    setErrors({});
+  };
+
+ 
+  const handleEdit = (index) => {
+    const s = sessions[index];
+    setForm(s);
+    setEditIndex(index);
+  };
+
+  const handleDelete = (index) => {
+    setSessions((prev) => prev.filter((_, i) => i !== index));
+  };
+
+
+  const filteredSessions = sessions.filter((s) => {
+    const q = searchQuery.toLowerCase();
+    return (
+      s.sessionID.toLowerCase().includes(q) ||
+      s.sessionTitle.toLowerCase().includes(q) ||
+      s.workshop.toLowerCase().includes(q) ||
+      s.speaker.toLowerCase().includes(q)
+    );
+  });
+
+  const getInputClass = (name) => {
+    if (!form[name]) return "";
+    return errors[name] ? "is-invalid" : "is-valid";
+  };
+
+  return (
+    <div className="container my-4">
+      <h2>Session Management</h2>
+
+      {/* SEARCH */}
+      <div className="mb-3">
+        <input
+          type="text"
+          id="searchInput"
+          className="form-control"
+          placeholder="Search sessions..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
+
+      {/* FORM */}
+      <form id="signupForm" onSubmit={handleSubmit} noValidate>
+        {[
+          { label: "Session ID", name: "sessionID" },
+          { label: "Session Title", name: "sessionTitle" },
+          { label: "Workshop", name: "workshop" },
+          { label: "Duration", name: "duration" },
+          { label: "Registration Fee", name: "registrationFee" },
+          { label: "Speaker", name: "speaker" },
+        ].map((field) => (
+          <div className="mb-3" key={field.name}>
+            <label className="form-label">{field.label}</label>
+            <input
+              type="text"
+              name={field.name}
+              className={`form-control ${getInputClass(field.name)}`}
+              value={form[field.name]}
+              onChange={handleChange}
+              required
+            />
+            {errors[field.name] && (
+              <div className="invalid-feedback d-block">{errors[field.name]}</div>
+            )}
+          </div>
+        ))}
+
+        {/* Additional Info */}
+        <div className="mb-3">
+          <label className="form-label">Additional Info</label>
+          <textarea
+            name="additionalInfo"
+            className="form-control"
+            value={form.additionalInfo}
+            onChange={handleChange}
+          ></textarea>
+        </div>
+
+        <button type="submit" className="btn btn-primary">
+          {editIndex !== null ? "Update Session" : "Add Session"}
+        </button>
+      </form>
+
+      <hr />
+
+      {/* SESSION LIST */}
+      <h3>All Sessions</h3>
+      <div id="sessionCard" className="mt-3">
+        {filteredSessions.length === 0 ? (
+          <p className="text-muted">No sessions found.</p>
+        ) : (
+          filteredSessions.map((session, index) => (
+            <div className="card mb-3 p-3" key={index}>
+              <h5>{session.sessionID}</h5>
+              <p>Session Title: {session.sessionTitle}</p>
+              <p>Workshop: {session.workshop}</p>
+              <p>Duration: {session.duration}</p>
+              <p>Registration Fee: {session.registrationFee}</p>
+              <p>Speaker: {session.speaker}</p>
+              <p>Additional Info: {session.additionalInfo}</p>
+
+              <button
+                className="btn btn-warning me-2"
+                onClick={() => handleEdit(index)}
+              >
+                Edit
+              </button>
+              <button
+                className="btn btn-danger"
+                onClick={() => handleDelete(index)}
+              >
+                Delete
+              </button>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
 }
 
+export default SessionManager;
 
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('signupForm').addEventListener('submit', handleSignupSubmit);
-    displayAllSessions();
-});
