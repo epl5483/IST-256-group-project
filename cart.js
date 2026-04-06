@@ -1,147 +1,240 @@
-var cart = [];
-const STORAGE_KEY = 'conference_session';
+import React, { useEffect, useState } from "react";
 
-$(document).ready(function() {
-    displayProductsFromStorage();
+const STORAGE_KEY = "conference_session";
 
-    function displayProductsFromStorage(filterQuery = "") {
-        const $productList = $('#productList');
-        let sessions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+function SessionCart() {
+  const [sessions, setSessions] = useState([]);
+  const [filterQuery, setFilterQuery] = useState("");
+  const [cart, setCart] = useState([]);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
 
-        if (filterQuery) {
-            sessions = sessions.filter(s => 
-                s.sessionTitle.toLowerCase().includes(filterQuery.toLowerCase()) ||
-                s.speaker.toLowerCase().includes(filterQuery.toLowerCase()) ||
-                s.sessionID.toLowerCase().includes(filterQuery.toLowerCase())
-            );
-        }
+  useEffect(() => {
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    setSessions(stored);
+  }, []);
 
-        $productList.empty();
+  const filteredSessions = sessions.filter((s) => {
+    const q = filterQuery.toLowerCase();
+    return (
+      (s.sessionTitle || "").toLowerCase().includes(q) ||
+      (s.speaker || "").toLowerCase().includes(q) ||
+      (s.sessionID || "").toLowerCase().includes(q)
+    );
+  });
 
-        if (sessions.length === 0) {
-            $productList.html('<p class="text-muted">No matching sessions found.</p>');
-            return;
-        }
+  const addToCart = (session) => {
+    const cleanPrice =
+      parseFloat((session.registrationFee || "").replace(/[^0-9.]/g, "")) || 0;
 
-        sessions.forEach((session) => {
-            let cleanPrice = session.registrationFee.replace(/[^0-9.]/g, '');
-            
-            var productHtml = `
-                <div class="card mb-3 p-3 shadow-sm border-0">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="m-0">${session.sessionTitle}</h5>
-                            <small class="text-muted">Speaker: ${session.speaker} | ID: ${session.sessionID}</small>
-                            <p class="m-0 mt-1 small">${session.workshop} (${session.duration})</p>
-                        </div>
-                        <div class="text-end">
-                            <p class="price-text m-0 mb-2">$${parseFloat(cleanPrice).toFixed(2)}</p>
-                            <button class="btn btn-primary btn-add-to-cart" 
-                                    data-id="${session.sessionID}" 
-                                    data-title="${session.sessionTitle}" 
-                                    data-price="${cleanPrice}">
-                                Add to Cart
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            $productList.append(productHtml);
-        });
+    setCart((prev) => {
+      const existing = prev.find((i) => i.id === session.sessionID);
+      if (existing) {
+        return prev.map((item) =>
+          item.id === session.sessionID
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+      return [
+        ...prev,
+        {
+          id: session.sessionID,
+          title: session.sessionTitle,
+          price: cleanPrice,
+          quantity: 1,
+        },
+      ];
+    });
+  };
+
+  const updateQuantity = (index, delta) => {
+    setCart((prev) => {
+      const updated = [...prev];
+      updated[index].quantity += delta;
+      if (updated[index].quantity <= 0) {
+        updated.splice(index, 1);
+      }
+      return updated;
+    });
+  };
+
+  const removeItem = (index) => {
+    setCart((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const totalAmount = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+
+  const handleCheckout = async () => {
+    if (cart.length === 0) {
+      alert("Please select a pass or workshop first!");
+      return;
     }
 
-    $('#searchInput').on('keyup', function() {
-        displayProductsFromStorage($(this).val());
-    });
+    setIsCheckingOut(true);
 
-    function updateCartUI() {
-        var $cartContainer = $('#cartItems');
-        var total = 0;
+    try {
+      const res = await fetch("https://jsonplaceholder.typicode.com/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderItems: cart,
+          orderDate: new Date().toISOString(),
+          totalAmount: totalAmount,
+        }),
+      });
 
-        if (cart.length === 0) {
-            $cartContainer.html('<p class="text-muted text-center">Your registration is empty</p>');
-            $('#cartTotal').text('$0.00');
-            return;
-        }
+      if (!res.ok) throw new Error("Network error");
 
-        $cartContainer.empty();
-        cart.forEach(function(item, index) {
-            var subtotal = item.price * item.quantity;
-            total += subtotal;
-            var cartHtml = `
-                <div class="cart-item mb-3 border-bottom pb-2">
-                    <div class="d-flex justify-content-between">
-                        <strong>${item.title}</strong>
-                        <button class="btn btn-sm text-danger btn-remove" data-index="${index}">&times;</button>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mt-1">
-                        <div class="btn-group btn-group-sm">
-                            <button class="btn btn-light border btn-qty-minus" data-index="${index}">-</button>
-                            <span class="btn btn-light border disabled">${item.quantity}</span>
-                            <button class="btn btn-light border btn-qty-plus" data-index="${index}">+</button>
-                        </div>
-                        <span class="text-muted">$${subtotal.toFixed(2)}</span>
-                    </div>
-                </div>`;
-            $cartContainer.append(cartHtml);
-        });
-        $('#cartTotal').text('$' + total.toFixed(2));
+      const data = await res.json();
+      alert("Registration Successful!\nConfirmation ID: CONF-" + data.id);
+      setCart([]);
+    } catch (err) {
+      alert("Error processing registration.");
+    } finally {
+      setIsCheckingOut(false);
     }
+  };
 
-    $(document).on('click', '.btn-add-to-cart', function() {
-        var id = $(this).data('id');
-        var title = $(this).data('title');
-        var price = parseFloat($(this).data('price')) || 0;
-        var existing = cart.find(i => i.id === id);
-        if (existing) { existing.quantity++; } 
-        else { cart.push({ id, title, price, quantity: 1 }); }
-        updateCartUI();
-    });
+  return (
+    <div className="container my-4">
+      <h2 className="mb-3">Conference Sessions & Registration</h2>
 
-    $(document).on('click', '.btn-qty-plus', function() {
-        cart[$(this).data('index')].quantity++;
-        updateCartUI();
-    });
+      <div className="row">
+        <div className="col-md-7">
+          <div className="mb-3">
+            <input
+              id="searchInput"
+              type="text"
+              className="form-control"
+              placeholder="Search sessions by title, speaker, or ID..."
+              value={filterQuery}
+              onChange={(e) => setFilterQuery(e.target.value)}
+            />
+          </div>
 
-    $(document).on('click', '.btn-qty-minus', function() { 
-        var idx = $(this).data('index');
-        cart[idx].quantity--;
-        if (cart[idx].quantity <= 0) cart.splice(idx, 1);
-        updateCartUI(); 
-    });
+          <div id="productList">
+            {filteredSessions.length === 0 ? (
+              <p className="text-muted">No matching sessions found.</p>
+            ) : (
+              filteredSessions.map((session) => {
+                const cleanPrice =
+                  parseFloat(
+                    (session.registrationFee || "").replace(/[^0-9.]/g, "")
+                  ) || 0;
 
-    $(document).on('click', '.btn-remove', function() {
-        cart.splice($(this).data('index'), 1);
-        updateCartUI();
-    });
+                return (
+                  <div
+                    className="card mb-3 p-3 shadow-sm border-0"
+                    key={session.sessionID}
+                  >
+                    <div className="d-flex justify-content-between align-items-center">
+                      <div>
+                        <h5 className="m-0">
+                          {session.sessionTitle || "Untitled Session"}
+                        </h5>
+                        <small className="text-muted">
+                          Speaker: {session.speaker || "Unknown"} | ID:{" "}
+                          {session.sessionID || "N/A"}
+                        </small>
+                        <p className="m-0 mt-1 small">
+                          {(session.workshop || "Workshop") +
+                            " (" +
+                            (session.duration || "Duration N/A") +
+                            ")"}
+                        </p>
+                      </div>
+                      <div className="text-end">
+                        <p className="price-text m-0 mb-2">
+                          ${cleanPrice.toFixed(2)}
+                        </p>
+                        <button
+                          className="btn btn-primary"
+                          onClick={() => addToCart(session)}
+                        >
+                          Add to Cart
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
 
-    $('#checkoutBtn').on('click', function() {
-        if (cart.length === 0) {
-            alert("Please select a pass or workshop first!");
-            return;
-        }
-        var $btn = $(this);
-        $btn.prop('disabled', true).text('Processing...');
-        $.ajax({
-            url: 'https://jsonplaceholder.typicode.com/posts',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({
-                orderItems: cart,
-                orderDate: new Date().toISOString(),
-                totalAmount: $('#cartTotal').text()
-            })
-        })
-        .done(function(res) {
-            alert('🐾 Registration Successful!\nConfirmation ID: CONF-' + res.id);
-            cart = [];
-            updateCartUI();
-        })
-        .fail(function() {
-            alert('Error processing registration.');
-        })
-        .always(function() {
-            $btn.prop('disabled', false).text('Complete Registration');
-        });
-    });
-});
+        <div className="col-md-5">
+          <h4>Your Registration</h4>
+          <div id="cartItems" className="mt-3">
+            {cart.length === 0 ? (
+              <p className="text-muted text-center">
+                Your registration is empty
+              </p>
+            ) : (
+              cart.map((item, index) => {
+                const subtotal = item.price * item.quantity;
+                return (
+                  <div
+                    className="cart-item mb-3 border-bottom pb-2"
+                    key={item.id}
+                  >
+                    <div className="d-flex justify-content-between">
+                      <strong>{item.title}</strong>
+                      <button
+                        className="btn btn-sm text-danger"
+                        onClick={() => removeItem(index)}
+                      >
+                        &times;
+                      </button>
+                    </div>
+                    <div className="d-flex justify-content-between align-items-center mt-1">
+                      <div className="btn-group btn-group-sm">
+                        <button
+                          className="btn btn-light border"
+                          onClick={() => updateQuantity(index, -1)}
+                        >
+                          -
+                        </button>
+                        <span className="btn btn-light border disabled">
+                          {item.quantity}
+                        </span>
+                        <button
+                          className="btn btn-light border"
+                          onClick={() => updateQuantity(index, 1)}
+                        >
+                          +
+                        </button>
+                      </div>
+                      <span className="text-muted">
+                        ${subtotal.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          <div className="mt-3 d-flex justify-content-between align-items-center">
+            <strong>Total:</strong>
+            <span id="cartTotal">${totalAmount.toFixed(2)}</span>
+          </div>
+
+          <button
+            id="checkoutBtn"
+            className="btn btn-success w-100 mt-3"
+            onClick={handleCheckout}
+            disabled={isCheckingOut}
+          >
+            {isCheckingOut ? "Processing..." : "Complete Registration"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default SessionCart;
+
