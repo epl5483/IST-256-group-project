@@ -1,107 +1,174 @@
-<!DOCTYPE html>
-<html lang="en">
+import React, { useState } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
 
-<head>
-   <meta charset="UTF-8">
-   <title>Session | Conservation Events</title>
+export default function SessionPage() {
+  const [formData, setFormData] = useState({
+    sessionID: "",
+    sessionTitle: "",
+    workshop: "",
+    duration: "",
+    registrationFee: "",
+    speaker: "",
+    additionalInfo: ""
+  });
 
-   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-   <link rel="stylesheet" href="style.css">
-</head>
+  const [errors, setErrors] = useState({});
+  const [sessions, setSessions] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
-<body class="bg-light">
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-<header class="bg-success text-white py-4">
-   <div class="container d-flex justify-content-between align-items-center">
-      <h2 class="fw-bold m-0">Wildlife Conservation Events</h2>
+  const validate = () => {
+    let newErrors = {};
+    Object.keys(formData).forEach((key) => {
+      if (key !== "additionalInfo" && formData[key].trim() === "") {
+        newErrors[key] = "This field is required.";
+      }
+    });
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-      <div>
-         <a href="index.html" class="btn btn-light me-2">Home</a>
-         <a href="signup.html" class="btn btn-dark">Sign Up</a>
-         <a href="session.html" class="btn btn-success">Session</a>
-         <a href="cart.html" class="btn btn-success">Cart</a>
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    const jsonDocument = { ...formData };
+    console.log("JSON Document:", jsonDocument);
+
+    fetch("https://example.com/api/sessions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(jsonDocument)
+    })
+      .then((res) => res.json())
+      .then(() => {
+        alert("Session saved successfully!");
+        setSessions([...sessions, jsonDocument]);
+      })
+      .catch((err) => console.error("AJAX Error:", err));
+  };
+
+  const filteredSessions = sessions.filter((s) =>
+    s.sessionTitle.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div className="bg-light">
+      <header className="bg-success text-white py-4">
+        <div className="container d-flex justify-content-between align-items-center">
+          <h2 className="fw-bold m-0">Wildlife Conservation Events</h2>
+          <div>
+            <a href="/" className="btn btn-light me-2">Home</a>
+            <a href="/signup" className="btn btn-dark">Sign Up</a>
+            <a href="/session" className="btn btn-success">Session</a>
+            <a href="/cart" className="btn btn-success">Cart</a>
+          </div>
+        </div>
+      </header>
+
+      <div className="container text-center mt-5">
+        <h1>Session Management</h1>
       </div>
-   </div>
-</header>
 
-<div class="container text-center mt-5">
-   <h1>Session Management</h1>
-</div>
+      <div className="container my-4">
+        <div className="input-group">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Search sessions..."
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <button className="btn btn-success">Search</button>
+        </div>
+      </div>
 
-<div class="container my-4">
-   <div class="input-group">
-      <input type="text" id="searchInput" class="form-control" placeholder="Search sessions...">
-      <button class="btn btn-success" onclick="searchSessions()">Search</button>
-   </div>
-</div>
+      <div className="container my-5">
+        <div className="card shadow-lg p-4">
+          <h2 className="text-center mb-4">Event Session Form</h2>
 
-<div class="container my-5">
-   <div class="card shadow-lg p-4">
-      <h2 class="text-center mb-4">Event Session Form</h2>
+          <form className="row g-3" onSubmit={handleSubmit}>
+            {[
+              { label: "Session ID", name: "sessionID" },
+              { label: "Session Title", name: "sessionTitle" },
+              { label: "Workshop", name: "workshop" },
+              { label: "Duration", name: "duration" },
+              { label: "Registration Fee", name: "registrationFee" },
+              { label: "Speaker", name: "speaker" }
+            ].map((field) => (
+              <div className="col-md-6" key={field.name}>
+                <label className="form-label">{field.label} *</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  name={field.name}
+                  value={formData[field.name]}
+                  onChange={handleChange}
+                />
+                {errors[field.name] && (
+                  <small className="text-danger">{errors[field.name]}</small>
+                )}
+              </div>
+            ))}
 
-      <form id="signupForm" class="row g-3">
+            <div className="col-12">
+              <label className="form-label">Additional Info</label>
+              <textarea
+                className="form-control"
+                name="additionalInfo"
+                rows="3"
+                value={formData.additionalInfo}
+                onChange={handleChange}
+              ></textarea>
+            </div>
 
-         <div class="col-md-6">
-            <label class="form-label">Session ID *</label>
-            <input type="text" class="form-control" id="sessionID" name = "sessionID" required>
-            <small class="text-danger" id="sessionIDError"></small>
-         </div>
+            <div className="col-12 text-center mt-3">
+              <button className="btn btn-success btn-lg" type="submit">
+                Save Session
+              </button>
+              <button
+                className="btn btn-secondary btn-lg"
+                type="reset"
+                onClick={() => {
+                  setFormData({
+                    sessionID: "",
+                    sessionTitle: "",
+                    workshop: "",
+                    duration: "",
+                    registrationFee: "",
+                    speaker: "",
+                    additionalInfo: ""
+                  });
+                  setErrors({});
+                }}
+              >
+                Clear
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
 
-         <div class="col-md-6">
-            <label class="form-label">Session Title *</label>
-            <input type="text" class="form-control" id="sessionTitle" name = "sessionTitle" required>
-            <small class="text-danger" id="sessionTitleError"></small>
-         </div>
+      <div className="container text-center my-5">
+        <h3 className="mb-3">Available Sessions</h3>
 
-         <div class="col-md-6">
-            <label class="form-label">Workshop *</label>
-            <input type="text" class="form-control" id="workshop" name = "workshop" required>
-            <small class="text-danger" id="workshopError"></small>
-         </div>
+        <div id="sessionCard">
+          {filteredSessions.map((s, index) => (
+            <div key={index} className="card p-3 mb-3 shadow-sm">
+              <h5>{s.sessionTitle}</h5>
+              <p><strong>Workshop:</strong> {s.workshop}</p>
+              <p><strong>Speaker:</strong> {s.speaker}</p>
+              <p><strong>Fee:</strong> {s.registrationFee}</p>
+            </div>
+          ))}
+        </div>
+      </div>
 
-         <div class="col-md-6">
-            <label class="form-label">Duration *</label>
-            <input type="text" class="form-control" id="duration" name = "duration" required>
-            <small class="text-danger" id="durationError"></small>
-         </div>
-
-         <div class="col-md-6">
-            <label class="form-label">Registration Fee *</label>
-            <input type="text" class="form-control" id="registrationFee" name = "registrationFee" required>
-            <small class="text-danger" id="registrationFeeError"></small>
-         </div>
-
-         <div class="col-md-6">
-            <label class="form-label">Speaker *</label>
-            <input type="text" class="form-control" id="speaker" name = "speaker" required>
-            <small class="text-danger" id="speakerError"></small>
-         </div>
-         
-
-         <div class="col-12">
-            <label class="form-label">Additional Info</label>
-            <textarea class="form-control" id="additionalInfo" rows="3"></textarea>
-         </div>
-
-         <div class="col-12 text-center mt-3">
-            <button class="btn btn-success btn-lg" type="submit">Save Session</button>
-            <button class="btn btn-secondary btn-lg" type="reset">Clear</button>
-         </div>
-
-      </form>
-   </div>
-</div>
-
-<div class="container text-center my-5">
-   <h3 class="mb-3">Available Sessions</h3>
-   <div id="sessionCard"></div>
-</div>
-
-<footer class="bg-dark text-white text-center py-3">
-   <p>&copy; 2026 Wildlife Conservation Initiative</p>
-</footer>
-
-<script src="session.js"></script>
-
-</body>
-</html>
+      <footer className="bg-dark text-white text-center py-3">
+        <p>&copy; 2026 Wildlife Conservation Initiative</p>
+      </footer>
+    </div>
+  );
+}
